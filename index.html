@@ -1,0 +1,1038 @@
+<!-- =============== LOKZEIT v4.5 — BLOCK 1/4 (HEAD + STYLES) =============== --><!doctype html>
+
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>LokZeit – Mobile v4.5</title>  <style>
+    :root{
+      --bg:#0a0c10;
+      --card:#0f141d;
+      --text:#eef2f7;
+      --sub:#94a3b8;
+      --primary:#3b82f6;
+      --border:#1e2633;
+      --danger:#ef4444;
+      --ok:#10b981;
+      --radius:18px;
+      --shadow:0 6px 18px rgba(0,0,0,.3);
+    }
+
+    html,body{
+      margin:0;padding:0;background:var(--bg);color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    }
+
+    *{box-sizing:border-box}
+
+    .app{max-width:860px;margin:0 auto;padding:10px 12px 20px}
+
+    /* HEADER */
+    .header{
+      position:sticky;top:0;z-index:40;
+      background:linear-gradient(0deg, rgba(10,12,16,0.90), rgba(10,12,16,0.98));
+      border-bottom:1px solid var(--border);
+      padding:12px 12px;display:flex;gap:10px;align-items:center;
+      backdrop-filter:blur(6px)
+    }
+
+    .title{font-weight:800;letter-spacing:.3px;font-size:19px}
+    .chip{border:1px solid var(--border);border-radius:999px;padding:4px 9px;font-size:11px;color:var(--sub);}
+    .grow{flex:1}
+
+    /* NAV BUTTONS */
+    .nav{display:flex;gap:8px}
+    .nav button{
+      background:#162032;border:1px solid var(--border);color:var(--text);
+      border-radius:12px;padding:8px 12px;font-size:13px;font-weight:600;
+    }
+    .nav button.active{background:var(--primary);border-color:var(--primary)}
+
+    /* BANNER */
+    .banner{
+      margin-top:12px;display:flex;gap:8px;align-items:center;
+      background:#0f172a;border:1px dashed var(--border);
+      border-radius:10px;color:var(--sub);padding:8px 12px;font-size:12px;
+    }
+
+    /* CARD */
+    .card{
+      background:var(--card);border:1px solid var(--border);
+      border-radius:var(--radius);padding:18px;margin:16px 0;
+      box-shadow:var(--shadow);
+    }
+
+    /* LABELS */
+    h2{margin:0 0 8px;font-size:20px}
+    label{display:block;color:var(--sub);margin:14px 0 6px;font-size:15px;font-weight:600;}
+
+    /* INPUTS */
+    input,select,textarea{
+      width:100%;background:#101826;color:var(--text);
+      border:1px solid var(--border);border-radius:18px;
+      padding:16px 18px;font-size:20px;line-height:1.35;
+    }
+    input[type="time"], input[type="date"]{font-size:20px;}
+    textarea{min-height:110px;resize:vertical;}
+
+    /* BUTTONS */
+    .btn{width:100%;border:none;border-radius:14px;padding:14px 16px;
+      font-size:17px;font-weight:700;color:#fff;background:var(--primary);
+      margin-top:10px;
+    }
+    .btn.ghost{background:#0f172a;border:1px solid var(--border);color:var(--sub)}
+    .btn.ok{background:var(--ok)}
+    .btn.danger{background:var(--danger)}
+
+    /* AUTOCOMPLETE */
+    .ac-list{position:absolute;z-index:50;background:#0f172a;width:100%;border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow)}
+    .ac-item{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer}
+    .ac-item:hover{background:#182030}
+    .ac-item:last-child{border-bottom:none}
+
+    /* PRINT */
+    @media print{
+      @page { size:A4 portrait; margin: 12mm 12mm 12mm 12mm; }
+      body{background:#fff;color:#000;font-family:Arial, sans-serif;}
+      .header,.nav,.banner,.no-print{display:none!important}
+      .app{max-width:none;padding:0;margin:0}
+    }
+  </style></head>
+<body>
+<div class="app">
+<!-- HEADER -->
+  <div class="header no-print">
+    <div class="title">LokZeit – Mobile</div>
+    <span class="chip">v4.5</span>
+    <span class="chip">offline</span>
+    <div class="grow"></div>
+    <div class="nav">
+      <button id="nav-start" class="active" onclick="UI.goto('start')">Start</button>
+      <button id="nav-act" onclick="UI.goto('activities')">Tät.</button>
+      <button id="nav-ev" onclick="UI.goto('events')">Vorf.</button>
+      <button id="nav-sum" onclick="UI.goto('summary')">Über.</button>
+    </div>
+  </div>
+
+  <!-- BANNER -->
+  <div class="banner no-print">
+    LokZeit v4.5 – Arbeitszeit, schutzwürdige Zeit, Gastfahrt (75 %), Mindestabnahme 8 h, Nachtschichten & Warnungen.
+  </div>
+
+  <!-- START -->
+  <section id="view-start" class="card">
+    <h2>Dienst starten</h2>
+
+    <label>Datum</label>
+    <input id="svcDate" type="date">
+
+    <label>Startzeit</label>
+    <input id="svcTime" type="time">
+
+    <label>Schichtnummer (optional)</label>
+    <input id="svcShift" placeholder="z. B. 2317">
+
+    <label>Loknummer (optional)</label>
+    <input id="svcLoco" inputmode="numeric" pattern="[0-9 ]*">
+
+    <label>Zugnummer (optional)</label>
+    <input id="svcTrain" inputmode="numeric" pattern="[0-9 ]*">
+
+    <label>Startort (Ril100, optional)</label>
+    <input id="svcPlace" list="rilList" placeholder="z. B. AH" onblur="UI.rilExpand(this)">
+
+    <datalist id="rilList"></datalist>
+
+    <button class="btn ok" onclick="Actions.startDuty()">Dienst beginnen</button>
+    <button class="btn ghost" onclick="UI.goto('ril')">Ril100 verwalten</button>
+    <button class="btn danger" onclick="App.resetAll()">Neu anfangen (alles löschen)</button>
+  </section>
+
+  <!-- RIL100 MANAGER -->
+  <section id="view-ril" class="card" style="display:none">
+    <h2>Ril100 – Kürzel verwalten</h2>
+
+    <label>Kürzel</label>
+    <input id="rilCode" placeholder="z. B. AH">
+
+    <label>Bezeichnung</label>
+    <input id="rilName" placeholder="z. B. Hamburg Hbf">
+
+    <button class="btn ok" onclick="RIL.add()">Kürzel hinzufügen / aktualisieren</button>
+
+    <h2 style="margin-top:18px;font-size:18px">Gespeicherte Kürzel</h2>
+    <div id="rilListView"></div>
+  </section>
+
+  <!-- TÄTIGKEITENLISTE -->
+  <section id="view-activities" class="card" style="display:none">
+    <h2>Tätigkeiten</h2>
+    <button class="btn ok" onclick="UI.openActivityFormNew()">Tätigkeit hinzufügen</button>
+
+    <div id="actList" style="margin-top:16px"></div>
+    <div id="actDebug" style="margin-top:8px;font-size:13px;color:#94a3b8"></div>
+
+    <button class="btn" style="margin-top:16px" onclick="UI.goto('events')">Vorkommnisse erfassen</button>
+    <button class="btn ghost" style="margin-top:8px" onclick="UI.goto('summary')">Direkt zur Übersicht</button>
+  </section>
+
+  <!-- TÄTIGKEITSFORMULAR -->
+  <section id="view-actForm" class="card" style="display:none">
+    <h2 id="actFormTitle">Tätigkeit erfassen</h2>
+
+    <label>Tätigkeit</label>
+    <select id="actType" onchange="UI.renderActFields()">
+      <option>Gastfahrt</option>
+      <option>Zugfahrt</option>
+      <option>Fußweg + V1</option>
+      <option>Fußweg + V3</option>
+      <option>A1 + Fußweg</option>
+      <option>A3 + Fußweg</option>
+      <option>Rangieren</option>
+      <option>Zugvorbereitung</option>
+      <option>Tätigkeitsunterbrechung</option>
+      <option>Arbeitsschutzpause</option>
+      <option>Ausbildung</option>
+      <option>Hotelaufenthalt</option>
+    </select>
+
+    <div id="actFields" style="margin-top:4px"></div>
+
+    <button class="btn ok" onclick="Actions.saveActivity()">Speichern</button>
+    <button class="btn ghost" onclick="UI.goto('activities')">Abbrechen</button>
+  </section>
+
+  <!-- VORKOMMNISSE -->
+  <section id="view-events" class="card" style="display:none">
+    <h2>Vorkommnisse</h2>
+
+    <label>Uhrzeit</label>
+    <input id="incTime" type="time">
+
+    <label>Ort (Ril100)</label>
+    <input id="incPlace" onblur="UI.rilExpand(this)">
+
+    <label>Art des Vorfalls</label>
+    <input id="incKind" placeholder="z. B. Zwangsbremsung">
+
+    <label>Loknummer</label>
+    <input id="incLoco" inputmode="numeric" pattern="[0-9 ]*">
+
+    <label>Zugnummer</label>
+    <input id="incTrain" inputmode="numeric" pattern="[0-9 ]*">
+
+    <label>Bemerkungen</label>
+    <textarea id="incNote"></textarea>
+
+    <button class="btn ok" onclick="Actions.addIncident()">Vorkommnis speichern</button>
+  </section>
+
+  <!-- ZUSAMMENFASSUNG -->
+  <section id="view-summary" class="card" style="display:none">
+    <h2>Übersicht</h2>
+    <div class="no-print" style="display:flex;gap:8px;margin-bottom:8px">
+      <button class="btn ghost" style="width:auto;padding:10px 12px" onclick="UI.printPdf()">PDF / Drucken</button>
+      <button class="btn ghost" style="width:auto;padding:10px 12px" onclick="App.shareReport()">Teilen</button>
+    </div>
+
+    <div id="summaryStats" class="card" style="margin-top:8px"></div>
+    <div id="summaryWarnings" class="card" style="margin-top:8px"></div>
+    <div id="summaryContent" style="margin-top:8px"></div>
+  </section>
+
+</div> <!-- .app schließen -->
+
+<script>
+// ===== STATE =====
+const state = {
+  duty: null,
+  activities: [],
+  incidents: [],
+  ril: {},
+  lastContext: { endTime:"", place:"", loco:"", train:"" },
+  editIndex: null,
+  settings: {
+    gastFaktor: 0.75,
+    mindestAbnahmeMin: 8*60
+  }
+};
+
+// ===== UTILS =====
+const UI = {
+  qs: s => document.querySelector(s),
+  qsa: s => document.querySelectorAll(s),
+
+  goto(view){
+    const views = ['start','ril','activities','actForm','events','summary'];
+    views.forEach(v=>{
+      const el = UI.qs('#view-' + v);
+      if(el) el.style.display = (v===view ? 'block' : 'none');
+    });
+    ['start','act','ev','sum'].forEach(id=>{
+      const b = UI.qs('#nav-' + id);
+      if(b) b.classList.remove('active');
+    });
+    if(view==='start') UI.qs('#nav-start').classList.add('active');
+    if(view==='activities') UI.qs('#nav-act').classList.add('active');
+    if(view==='events') UI.qs('#nav-ev').classList.add('active');
+    if(view==='summary') UI.qs('#nav-sum').classList.add('active');
+
+    if(view==='summary') App.updateSummary();
+  },
+
+  rilExpand(inp){
+    if(!inp.value) return;
+    const code = inp.value.split('–')[0].trim().toUpperCase();
+    if(state.ril[code]) inp.value = `${code} – ${state.ril[code]}`;
+  },
+
+  renderActFields(){
+    const t = UI.qs('#actType').value;
+    const box = UI.qs('#actFields');
+    let html = "";
+
+    if(t === 'Gastfahrt'){
+      html = `
+        <label>Startzeit</label>
+        <input id="actStart" type="time">
+        <label>Endzeit</label>
+        <input id="actEnd" type="time">
+        <label>Startort (Ril100)</label>
+        <input id="actStartPlace" onblur="UI.rilExpand(this)">
+        <label>Zielort (Ril100)</label>
+        <input id="actEndPlace" onblur="UI.rilExpand(this)">
+        <label>Bemerkungen</label>
+        <textarea id="actNotes"></textarea>
+      `;
+    } else if(t === 'Zugfahrt'){
+      html = `
+        <label>Zuggattung</label>
+        <select id="actZuggattung">
+          <option>Tfzf (D)</option>
+          <option>DGS</option>
+          <option>DPF</option>
+          <option>DLr</option>
+        </select>
+        <label>Zugnummer</label>
+        <input id="actTrain" inputmode="numeric" pattern="[0-9 ]*">
+        <label>Loknummer</label>
+        <input id="actLoco" inputmode="numeric" pattern="[0-9 ]*">
+        <label>Startort (Ril100)</label>
+        <input id="actStartPlace" onblur="UI.rilExpand(this)">
+        <label>Zielort (Ril100)</label>
+        <input id="actEndPlace" onblur="UI.rilExpand(this)">
+        <label>Startzeit</label>
+        <input id="actStart" type="time">
+        <label>Endzeit</label>
+        <input id="actEnd" type="time">
+        <label>Bemerkungen</label>
+        <textarea id="actNotes"></textarea>
+      `;
+    } else if(t === 'Hotelaufenthalt'){
+      html = `
+        <label>Ort (Ril100)</label>
+        <input id="actPlace" onblur="UI.rilExpand(this)">
+        <label>Startzeit</label>
+        <input id="actStart" type="time">
+        <label>Endzeit</label>
+        <input id="actEnd" type="time">
+        <label>Bemerkungen</label>
+        <textarea id="actNotes"></textarea>
+      `;
+    } else if(t === 'Ausbildung'){
+      html = `
+        <label>Ort (Ril100)</label>
+        <input id="actPlace" onblur="UI.rilExpand(this)">
+        <label>Art der Ausbildung</label>
+        <select id="actAusbildungArt" onchange="UI.onAusbildungArtChange()">
+          <option>RFU (Unterricht)</option>
+          <option>Streckenkunde</option>
+          <option>Baureihenschulung</option>
+          <option>Fahrpraktische Ausbildung</option>
+          <option>Sonstiges</option>
+        </select>
+        <div id="ausbildungLokZugBox">
+          <label>Loknummer</label>
+          <input id="actLoco" inputmode="numeric" pattern="[0-9 ]*">
+          <label>Zugnummer</label>
+          <input id="actTrain" inputmode="numeric" pattern="[0-9 ]*">
+        </div>
+        <label>Startzeit</label>
+        <input id="actStart" type="time">
+        <label>Endzeit</label>
+        <input id="actEnd" type="time">
+        <label>Bemerkungen</label>
+        <textarea id="actNotes"></textarea>
+      `;
+    } else if(t === 'Arbeitsschutzpause'){
+      html = `
+        <label>Startzeit</label>
+        <input id="actStart" type="time">
+        <label>Endzeit</label>
+        <input id="actEnd" type="time">
+        <label>Bemerkungen</label>
+        <textarea id="actNotes"></textarea>
+      `;
+    } else if(t === 'Tätigkeitsunterbrechung'){
+      html = `
+        <label>Ort (Ril100)</label>
+        <input id="actPlace" onblur="UI.rilExpand(this)">
+        <label>Startzeit</label>
+        <input id="actStart" type="time">
+        <label>Endzeit</label>
+        <input id="actEnd" type="time">
+        <label>Bemerkungen</label>
+        <textarea id="actNotes"></textarea>
+      `;
+    } else {
+      html = `
+        <label>Ort (Ril100)</label>
+        <input id="actPlace" onblur="UI.rilExpand(this)">
+        <label>Startzeit</label>
+        <input id="actStart" type="time">
+        <label>Endzeit</label>
+        <input id="actEnd" type="time">
+        <label>Loknummer</label>
+        <input id="actLoco" inputmode="numeric" pattern="[0-9 ]*">
+        <label>Zugnummer</label>
+        <input id="actTrain" inputmode="numeric" pattern="[0-9 ]*">
+        <label>Bemerkungen</label>
+        <textarea id="actNotes"></textarea>
+      `;
+    }
+
+    box.innerHTML = html;
+
+    // Auto-Vorbelegung bei neuer Tätigkeit
+    if(state.editIndex === null){
+      const ctx = state.lastContext;
+      const s = UI.qs('#actStart');
+      if(s && ctx.endTime) s.value = ctx.endTime;
+      const loco = UI.qs('#actLoco');
+      if(loco && ctx.loco) loco.value = ctx.loco;
+      const train = UI.qs('#actTrain');
+      if(train && ctx.train) train.value = ctx.train;
+      const sp = UI.qs('#actStartPlace');
+      const pl = UI.qs('#actPlace');
+      if(sp && ctx.place) sp.value = ctx.place;
+      if(pl && ctx.place) pl.value = ctx.place;
+    }
+
+    if(t === 'Ausbildung') UI.onAusbildungArtChange();
+  },
+
+  onAusbildungArtChange(){
+    const art = UI.qs('#actAusbildungArt').value;
+    const box = UI.qs('#ausbildungLokZugBox');
+    if(!box) return;
+    box.style.display = (art === 'RFU (Unterricht)') ? 'none' : 'block';
+  },
+
+  openActivityFormNew(){
+    state.editIndex = null;
+    UI.qs('#actFormTitle').textContent = 'Tätigkeit erfassen';
+    const typeSel = UI.qs('#actType');
+    if(state.activities.length){
+      typeSel.value = state.activities[state.activities.length-1].type;
+    } else {
+      typeSel.value = 'Gastfahrt';
+    }
+    UI.goto('actForm');
+    UI.renderActFields();
+  },
+
+  openActivityFormEdit(idx){
+    const a = state.activities[idx];
+    state.editIndex = idx;
+    UI.qs('#actFormTitle').textContent = 'Tätigkeit bearbeiten';
+    const typeSel = UI.qs('#actType');
+    typeSel.value = a.type;
+    UI.goto('actForm');
+    UI.renderActFields();
+
+    const g = id => UI.qs('#'+id);
+
+    if(g('actStart')) g('actStart').value = a.startTime || "";
+    if(g('actEnd'))   g('actEnd').value   = a.endTime   || "";
+
+    if(a.type === 'Gastfahrt' || a.type === 'Zugfahrt'){
+      if(g('actStartPlace')) g('actStartPlace').value = a.startPlace || "";
+      if(g('actEndPlace'))   g('actEndPlace').value   = a.endPlace   || "";
+    } else {
+      if(g('actPlace')) g('actPlace').value = a.place || "";
+    }
+
+    if(a.type === 'Zugfahrt'){
+      if(g('actZuggattung')) g('actZuggattung').value = a.zuggattung || "Tfzf (D)";
+      if(g('actTrain'))      g('actTrain').value      = a.train || "";
+      if(g('actLoco'))       g('actLoco').value       = a.loco  || "";
+    } else if(a.type === 'Ausbildung'){
+      if(g('actAusbildungArt')){
+        g('actAusbildungArt').value = a.ausbildungArt || "RFU (Unterricht)";
+        UI.onAusbildungArtChange();
+      }
+      if(g('actLoco'))  g('actLoco').value  = a.loco  || "";
+      if(g('actTrain')) g('actTrain').value = a.train || "";
+    } else {
+      if(g('actLoco'))  g('actLoco').value  = a.loco  || "";
+      if(g('actTrain')) g('actTrain').value = a.train || "";
+    }
+
+    if(g('actNotes')) g('actNotes').value = a.notes || "";
+  },
+
+  renderActivities(){
+    const box = UI.qs('#actList');
+    box.innerHTML = '';
+    state.activities.forEach((a,idx)=>{
+      const el = document.createElement('div');
+      el.className = 'card';
+
+      const ort = a.startPlace ? `${a.startPlace} → ${a.endPlace}` :
+                  (a.place || '–');
+      let zug = "-";
+      if(a.type === 'Zugfahrt'){
+        zug = (a.zuggattung ? a.zuggattung + " " : "") + (a.train || "");
+        if(!a.train && a.zuggattung) zug = a.zuggattung;
+      } else if(a.train){
+        zug = a.train;
+      }
+
+      const locoLine = (a.loco || a.train || a.zuggattung)
+        ? `Lok: ${a.loco || '-'} | Zug: ${zug}`
+        : '';
+
+      el.innerHTML = `
+        <div>
+          <strong>${a.type}</strong><br>
+          ${a.startTime || ''} – ${a.endTime || ''}<br>
+          ${ort ? 'Ort: ' + ort + '<br>' : ''}
+          ${locoLine ? locoLine + '<br>' : ''}
+          <em>${a.notes || ''}</em>
+        </div>
+        <div class="no-print" style="margin-top:8px;text-align:right">
+          <button class="btn" style="width:auto;padding:6px 10px;font-size:13px;background:#1e293b" onclick="Actions.editActivity(${idx})">📝 Bearbeiten</button>
+          <button class="btn" style="width:auto;padding:6px 10px;font-size:13px;background:#7f1d1d" onclick="Actions.deleteActivity(${idx})">🗑️ Löschen</button>
+        </div>
+      `;
+      box.appendChild(el);
+    });
+    UI.qs('#actDebug').textContent =
+      `Gespeicherte Tätigkeiten: ${state.activities.length}`;
+  },
+
+  renderEvents(){
+    const box = UI.qs('#eventList');
+    if(!box) return;
+    box.innerHTML = '';
+    state.incidents.forEach(i=>{
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.innerHTML = `
+        <strong>${i.kind}</strong><br>
+        Uhrzeit: ${i.time}<br>
+        Ort: ${i.place}<br>
+        Lok: ${i.loco || '-'} | Zug: ${i.train || '-'}<br>
+        <em>${i.note || ''}</em>
+      `;
+      box.appendChild(el);
+    });
+  },
+
+  renderSummary(){
+    const box = UI.qs('#summaryContent');
+    box.innerHTML = '';
+    if(!state.duty){
+      box.innerHTML = "<div class='card'>Kein Dienst gestartet.</div>";
+      return;
+    }
+    const d = state.duty;
+    box.innerHTML += `
+      <div class="card">
+        <strong>Dienstbeginn:</strong> ${d.date || ''} ${d.startTime || ''}<br>
+        Schicht: ${d.shift || '-'}<br>
+        Startort: ${d.place || '-'}<br>
+        Lok: ${d.loco || '-'} | Zug: ${d.train || '-'}
+      </div>
+    `;
+
+    if(state.activities.length){
+      box.innerHTML += `<h3>Tätigkeiten</h3>`;
+      state.activities.forEach(a=>{
+        const ort = a.startPlace ? `${a.startPlace} → ${a.endPlace}` :
+                    (a.place || '–');
+        let zug = "-";
+        if(a.type === 'Zugfahrt'){
+          zug = (a.zuggattung ? a.zuggattung + " " : "") + (a.train || "");
+          if(!a.train && a.zuggattung) zug = a.zuggattung;
+        } else if(a.train){
+          zug = a.train;
+        }
+        const locoLine = (a.loco || a.train || a.zuggattung)
+          ? `Lok: ${a.loco || '-'} | Zug: ${zug}<br>`
+          : '';
+        box.innerHTML += `
+          <div class="card">
+            <strong>${a.type}</strong><br>
+            ${a.startTime || ''} – ${a.endTime || ''}<br>
+            Ort: ${ort}<br>
+            ${locoLine}
+            <em>${a.notes || ''}</em>
+          </div>
+        `;
+      });
+    }
+
+    if(state.incidents.length){
+      box.innerHTML += `<h3>Vorkommnisse</h3>`;
+      state.incidents.forEach(i=>{
+        box.innerHTML += `
+          <div class="card">
+            <strong>${i.kind}</strong> (${i.time})<br>
+            Ort: ${i.place}<br>
+            Lok: ${i.loco || '-'} | Zug: ${i.train || '-'}<br>
+            <em>${i.note || ''}</em>
+          </div>
+        `;
+      });
+    }
+  },
+
+  renderSummaryStats(stats){
+    const sBox = UI.qs('#summaryStats');
+    const wBox = UI.qs('#summaryWarnings');
+    const fmt = App.fmtHM;
+
+    sBox.innerHTML = `
+      <strong>Kennzahlen</strong><br>
+      Arbeitszeit gesamt: ${fmt(stats.workTotalMin)}<br>
+      &nbsp;&nbsp;davon schutzwürdig: ${fmt(stats.workProtectMin)}<br>
+      &nbsp;&nbsp;davon nicht schutzwürdig: ${fmt(stats.workNonProtectMin)}<br>
+      &nbsp;&nbsp;davon Gastfahrt (75 %): ${fmt(stats.workGastMin)}<br>
+      Pausenzeit (Arbeitsschutzpause): ${fmt(stats.pauseMin)}<br>
+      Schichtzeit angerechnet: ${fmt(stats.shiftAccMin)}<br>
+      Mindestabnahme: ${fmt(state.settings.mindestAbnahmeMin)}<br>
+      Auszahlungszeit: ${fmt(stats.payoutMin)}
+    `;
+
+    if(!stats.warnings.length){
+      wBox.innerHTML = `Keine arbeitszeitrechtlichen Auffälligkeiten.`;
+    } else {
+      let html = '';
+      stats.warnings.forEach(w=>{
+        html += `<div>${w.level === 'error' ? '⚠️' : 'ℹ️'} ${w.msg}</div>`;
+      });
+      wBox.innerHTML = html;
+    }
+  },
+
+  printPdf(){
+    App.updateSummary();
+    window.print();
+  }
+};
+
+// RIL100-Verwaltung
+const RIL = {
+  add(){
+    const code = UI.qs('#rilCode').value.trim().toUpperCase();
+    const name = UI.qs('#rilName').value.trim();
+    if(!code || !name) return;
+    state.ril[code] = name;
+    UI.qs('#rilCode').value = '';
+    UI.qs('#rilName').value = '';
+    RIL.renderList();
+    RIL.renderDatalist();
+  },
+  renderList(){
+    const box = UI.qs('#rilListView');
+    box.innerHTML = '';
+    Object.keys(state.ril).sort().forEach(k=>{
+      const div = document.createElement('div');
+      div.textContent = `${k} – ${state.ril[k]}`;
+      box.appendChild(div);
+    });
+  },
+  renderDatalist(){
+    const dl = UI.qs('#rilList');
+    if(!dl) return;
+    dl.innerHTML = '';
+    Object.keys(state.ril).sort().forEach(k=>{
+      const opt = document.createElement('option');
+      opt.value = k;
+      opt.label = `${k} – ${state.ril[k]}`;
+      dl.appendChild(opt);
+    });
+  }
+};
+
+// ACTIONS
+const Actions = {
+  startDuty(){
+    state.duty = {
+      date: UI.qs('#svcDate').value,
+      startTime: UI.qs('#svcTime').value,
+      shift: UI.qs('#svcShift').value,
+      loco: UI.qs('#svcLoco').value,
+      train: UI.qs('#svcTrain').value,
+      place: UI.qs('#svcPlace').value
+    };
+    state.lastContext.endTime = state.duty.startTime || "";
+    state.lastContext.loco   = state.duty.loco   || "";
+    state.lastContext.train  = state.duty.train  || "";
+    state.lastContext.place  = state.duty.place  || "";
+    UI.goto('activities');
+    UI.renderActivities();
+  },
+
+  saveActivity(){
+    const t = UI.qs('#actType').value;
+    const g = id => UI.qs('#'+id) ? UI.qs('#'+id).value : "";
+
+    const a = { type: t };
+    a.startTime   = g('actStart');
+    a.endTime     = g('actEnd');
+    a.place       = g('actPlace');
+    a.startPlace  = g('actStartPlace');
+    a.endPlace    = g('actEndPlace');
+    a.notes       = g('actNotes');
+
+    if(t === 'Zugfahrt'){
+      a.zuggattung = g('actZuggattung');
+      a.train      = g('actTrain');
+      a.loco       = g('actLoco');
+    } else if(t === 'Ausbildung'){
+      a.ausbildungArt = g('actAusbildungArt');
+      if(a.ausbildungArt !== 'RFU (Unterricht)'){
+        a.loco  = g('actLoco');
+        a.train = g('actTrain');
+      } else {
+        a.loco = ""; a.train=""; a.zuggattung="";
+      }
+    } else if(t === 'Gastfahrt' || t === 'Hotelaufenthalt' || t === 'Arbeitsschutzpause'){
+      a.loco = ""; a.train = ""; a.zuggattung="";
+    } else if(t === 'Tätigkeitsunterbrechung'){
+      a.loco = ""; a.train = ""; a.zuggattung="";
+    } else {
+      a.loco  = g('actLoco');
+      a.train = g('actTrain');
+    }
+
+    if(state.editIndex !== null){
+      state.activities[state.editIndex] = a;
+      state.editIndex = null;
+    } else {
+      state.activities.push(a);
+    }
+
+    Actions.recalcLastContext();
+    UI.goto('activities');
+    UI.renderActivities();
+  },
+
+  recalcLastContext(){
+    const ctx = state.lastContext;
+    if(state.activities.length){
+      const last = state.activities[state.activities.length-1];
+      ctx.endTime = last.endTime || "";
+      ctx.loco    = last.loco   || (state.duty?.loco  || "");
+      ctx.train   = last.train  || (state.duty?.train || "");
+      if(last.endPlace) ctx.place = last.endPlace;
+      else if(last.place) ctx.place = last.place;
+      else if(last.startPlace) ctx.place = last.startPlace;
+    } else if(state.duty){
+      ctx.endTime = state.duty.startTime || "";
+      ctx.loco    = state.duty.loco || "";
+      ctx.train   = state.duty.train || "";
+      ctx.place   = state.duty.place || "";
+    } else {
+      ctx.endTime = "";ctx.loco="";ctx.train="";ctx.place="";
+    }
+  },
+
+  editActivity(idx){
+    UI.openActivityFormEdit(idx);
+  },
+
+  deleteActivity(idx){
+    if(!confirm("Tätigkeit wirklich löschen?")) return;
+    state.activities.splice(idx,1);
+    state.editIndex = null;
+    Actions.recalcLastContext();
+    UI.renderActivities();
+  },
+
+  addIncident(){
+    const g = id => UI.qs('#'+id) ? UI.qs('#'+id).value : "";
+    const i = {
+      time: g('incTime'),
+      place:g('incPlace'),
+      kind: g('incKind'),
+      loco: g('incLoco'),
+      train:g('incTrain'),
+      note: g('incNote')
+    };
+    state.incidents.push(i);
+    UI.renderEvents();
+  }
+};
+
+// Arbeitszeit-Berechnung
+const App = {
+  parseHM(str){
+    if(!str) return null;
+    const p = str.split(':');
+    if(p.length!==2) return null;
+    const h = parseInt(p[0],10), m=parseInt(p[1],10);
+    if(isNaN(h)||isNaN(m)) return null;
+    return h*60+m;
+  },
+  fmtHM(min){
+    if(!min || min<=0) return "0:00";
+    const h = Math.floor(min/60), m=min%60;
+    return `${h}:${m.toString().padStart(2,'0')}`;
+  },
+
+  computeStats(){
+    let workTotalMin=0, workProtectMin=0, workNonProtectMin=0, workGastMin=0;
+    let pauseMin=0, shiftAccMin=0, gastFullMin=0;
+    const gf = state.settings.gastFaktor;
+
+    state.activities.forEach(a=>{
+      const s = App.parseHM(a.startTime);
+      const e0 = App.parseHM(a.endTime);
+      if(s===null || e0===null) return;
+      let e=e0;
+      if(e<s) e+=24*60; // Nachtschicht
+      const dur = e-s;
+      if(dur<=0) return;
+
+      const t=a.type;
+      const ausArt=a.ausbildungArt||"";
+
+      const isHotel=(t==='Hotelaufenthalt');
+      const isPause=(t==='Arbeitsschutzpause');
+      const isGast =(t==='Gastfahrt');
+      const isTU   =(t==='Tätigkeitsunterbrechung');
+      const isAusRFU=(t==='Ausbildung' && ausArt==='RFU (Unterricht)');
+
+      if(isHotel){
+        return;
+      }
+      if(isPause){
+        pauseMin += dur;
+        shiftAccMin += dur;
+        return;
+      }
+      if(isGast){
+        gastFullMin += dur;
+        const ang = Math.round(dur*gf);
+        workTotalMin += ang;
+        workGastMin  += ang;
+        shiftAccMin  += ang;
+        return;
+      }
+      if(isTU || isAusRFU){
+        workTotalMin     += dur;
+        workNonProtectMin+= dur;
+        shiftAccMin      += dur;
+        return;
+      }
+
+      // schutzwürdig
+      workTotalMin   += dur;
+      workProtectMin += dur;
+      shiftAccMin    += dur;
+    });
+
+    const calcNonProt = Math.max(0, workTotalMin - workProtectMin - workGastMin);
+    if(workNonProtectMin < calcNonProt) workNonProtectMin = calcNonProt;
+
+    const payoutMin = Math.max(workTotalMin, state.settings.mindestAbnahmeMin);
+
+    const warnings = [];
+    if(workTotalMin > 6*60 && pauseMin < 30){
+      warnings.push({
+        level:'warn',
+        msg:`Arbeitsschutzpause unter 30 Minuten bei Arbeitszeit über 6 Stunden (${App.fmtHM(pauseMin)}).`
+      });
+    }
+    if(workTotalMin > 9*60 && pauseMin < 45){
+      warnings.push({
+        level:'error',
+        msg:`Arbeitsschutzpause unter 45 Minuten bei Arbeitszeit über 9 Stunden (${App.fmtHM(pauseMin)}).`
+      });
+    }
+    if(shiftAccMin > 14*60){
+      warnings.push({
+        level:'error',
+        msg:`Schichtzeit überschreitet 14 Stunden (${App.fmtHM(shiftAccMin)}).`
+      });
+      if(!App._alerted14h){
+        alert("Achtung: Schichtzeit über 14 Stunden. Nur in Ausnahmefällen zulässig.");
+        App._alerted14h = true;
+      }
+    } else if(shiftAccMin > 13.5*60){
+      warnings.push({
+        level:'warn',
+        msg:`Schichtzeit nähert sich der 14-Stunden-Grenze (${App.fmtHM(shiftAccMin)}).`
+      });
+    }
+
+    return {
+      workTotalMin,
+      workProtectMin,
+      workNonProtectMin,
+      workGastMin,
+      pauseMin,
+      shiftAccMin,
+      payoutMin,
+      gastFullMin,
+      warnings
+    };
+  },
+
+  updateSummary(){
+    const stats = App.computeStats();
+    UI.renderSummaryStats(stats);
+    UI.renderSummary();
+  },
+
+  buildTextReport(){
+    const stats = App.computeStats();
+    const fmt = App.fmtHM;
+    const d = state.duty || {};
+    let txt = "";
+
+    txt += `Dienstbericht – ${d.date || ""} Schicht ${d.shift || ""}\n`;
+    txt += `Beginn: ${d.date || ""} ${d.startTime || ""} Ort: ${d.place || "-"}\n`;
+    txt += `Lok: ${d.loco || "-"} | Zug: ${d.train || "-"}\n\n`;
+
+    txt += `Arbeitszeit gesamt: ${fmt(stats.workTotalMin)}\n`;
+    txt += `  davon schutzwürdig: ${fmt(stats.workProtectMin)}\n`;
+    txt += `  davon nicht schutzwürdig: ${fmt(stats.workNonProtectMin)}\n`;
+    txt += `  davon Gastfahrt (75 %): ${fmt(stats.workGastMin)}\n`;
+    txt += `Pausenzeit: ${fmt(stats.pauseMin)}\n`;
+    txt += `Schichtzeit angerechnet: ${fmt(stats.shiftAccMin)}\n`;
+    txt += `Mindestabnahme: ${fmt(state.settings.mindestAbnahmeMin)}\n`;
+    txt += `Auszahlungszeit: ${fmt(stats.payoutMin)}\n\n`;
+
+    txt += `Tätigkeiten:\n`;
+    state.activities.forEach(a=>{
+      const ort = a.startPlace ? `${a.startPlace} → ${a.endPlace}` :
+                  (a.place || '–');
+      let zug = "-";
+      if(a.type === 'Zugfahrt'){
+        zug = (a.zuggattung ? a.zuggattung + " " : "") + (a.train || "");
+        if(!a.train && a.zuggattung) zug = a.zuggattung;
+      } else if(a.train){
+        zug = a.train;
+      }
+      txt += `- ${a.type}: ${a.startTime || ""}–${a.endTime || ""}, Ort: ${ort}, Lok: ${a.loco || "-"} Zug: ${zug}\n`;
+      if(a.notes) txt += `  Bemerkungen: ${a.notes}\n`;
+    });
+
+    if(state.incidents.length){
+      txt += `\nVorkommnisse:\n`;
+      state.incidents.forEach(i=>{
+        txt += `- ${i.kind} (${i.time}), Ort: ${i.place}, Lok: ${i.loco || "-"} Zug: ${i.train || "-"}\n`;
+        if(i.note) txt += `  Bemerkungen: ${i.note}\n`;
+      });
+    }
+
+    if(stats.warnings.length){
+      txt += `\nHinweise/Warnungen:\n`;
+      stats.warnings.forEach(w=>{
+        txt += `- ${w.msg}\n`;
+      });
+    }
+
+    return txt;
+  },
+
+  async shareReport(){
+    const text = App.buildTextReport();
+    if(navigator.share){
+      try{
+        await navigator.share({
+          title: 'Dienstbericht LokZeit',
+          text
+        });
+      }catch(e){
+        console.log("Share abgebrochen oder nicht verfügbar:", e);
+        alert("Teilen abgebrochen oder nicht verfügbar.");
+      }
+    } else {
+      alert("Teilen über das System wird von diesem Browser nicht unterstützt. Du kannst den Bericht aus der Druckansicht exportieren.");
+    }
+  },
+
+  resetAll(){
+    if(!confirm("Wirklich alles löschen?")) return;
+    state.duty=null;state.activities=[];state.incidents=[];
+    state.lastContext={endTime:"",place:"",loco:"",train:""};
+    state.editIndex=null;
+    App._alerted14h=false;
+    UI.goto('start');
+    UI.qs('#summaryContent').innerHTML='';
+    UI.qs('#summaryStats').innerHTML='';
+    UI.qs('#summaryWarnings').innerHTML='';
+    UI.qs('#actList').innerHTML='';
+    UI.qs('#actDebug').textContent='';
+    const ev = UI.qs('#eventList'); if(ev) ev.innerHTML='';
+  }
+};
+
+// RIL100-STAMMDATEN (deine bekannten Kürzel)
+state.ril = {
+  "AA":"Hamburg-Altona","AE":"Hamburg-Eidelstedt","AH":"Hamburg Hbf","AHAR":"Hamburg-Harburg",
+  "AHOS":"Hamburg Hohe Schaar","AWHO":"Hamburg-Waltershof","AWHOS":"Hamburg-Waltershof Alte Süderelbe",
+  "ALA":"Hamburg-Langenfelde Bbf","AM":"Maschen Rbf",
+  "BFP":"Frankfurt (Oder) Pbf","BHG":"Horka Gbf","BODK":"Frankfurt (Oder) Oderbrücke","BSPE":"Spreewitz",
+  "BLS":"Berlin Hbf (Stadtbahn)","BL":"Berlin Hbf (tief)","BPAF":"Berlin Südkreuz","BLO":"Berlin-Lichtenberg",
+  "BGS":"Berlin-Gesundbrunnen","BNO":"Berlin Nordost","BHF":"Berlin Ostbahnhof","BOSGA":"Berlin Ostgüterbahnhof B7",
+  "BWUR":"Wustermark Rbf","BGD":"Berlin-Grunewald","BFHS":"Berlin-Schönefeld","BEW":"Elsterwerda",
+  "DA":"Dresden-Altstadt","DF":"Dresden-Friedrichstadt","DH":"Dresden Hbf","DM":"Dresden-Mitte",
+  "DN":"Dresden-Neustadt","DPI":"Pirna","DR":"Riesa","DR R":"Riesa Rbf","DSA":"Bad Schandau",
+  "EHM":"Hamm (Westf) Pbf","EHRB":"Hamm (Westf) Rbf","EOBR":"Oberhausen West","EDRH":"Duisburg-Ruhrort Hafen",
+  "FD":"Darmstadt Hbf","FFO":"Frankfurt (Main) Ost","FFS":"Frankfurt (Main) Süd","FFU":"Fulda",
+  "FFU G":"Fulda Gbf","FKW":"Kassel-Wilhelmshöhe","FKR":"Kassel Rbf",
+  "HB":"Bremen Hbf","HBR":"Bremen Rbf","HBH":"Bremerhaven Hbf","HBHLA":"Bremerhaven-Lehe Abstellbf",
+  "HBHSK":"Bremerhaven Kaiserhafen","HBHID":"Bremerhaven Insumer Deich","HBHNH":"Bremerhaven Nordhafen",
+  "HOLD":"Oldenburg (Oldb) Hbf","HE":"Emden","HER":"Emden Rbf","HLIG":"Lingen (Ems)",
+  "HMEP":"Meppen","HLEE":"Leer","HLEEP":"Leer Gbf","HHOH":"Holthausen (Ems)",
+  "HG":"Göttingen","HF":"Fallersleben","HNBG":"Nienburg (Weser)","HV":"Verden (Aller)",
+  "HWUN":"Wunstorf","HM":"Minden","HH":"Hannover Hbf","HHLM":"Helmstedt","HWU":"Hannover-Wülfel",
+  "HSB":"Salzgitter-Bad","HSRI":"Salzgitter-Ringelheim",
+  "KK":"Köln Hbf","KMO":"Moers","KRH":"Rheinhausen","KTR":"Trompet",
+  "LL":"Leipzig Hbf","LE":"Leipzig-Engelsdorf","LH":"Halle (Saale) Hbf","LHG":"Halle Gbf",
+  "LF":"Falkenberg (Elster)","LF U":"Falkenberg unt. Bf (B20)","LF O":"Falkenberg ob. Bf",
+  "LK":"Köthen","LGC":"Großkorbetha","LM":"Magdeburg Hbf","LMB":"Magdeburg-Buckau",
+  "LMR":"Magdeburg-Rothensee","LMS":"Magdeburg-Sudenburg","LS":"Stendal",
+  "LA":"Altenburg","LBO":"Böhlen (b. Leipzig)","LBWE":"Böhlen Werke","LGW":"Markkleeberg-Gaschwitz",
+  "MH":"München Hbf","MMBH":"München-Milbertshofen","MN":"München Nord Rbf","MLA":"Landshut (Bay) Hbf",
+  "MDIF":"Dingolfing","MIH":"Ingolstadt Hbf","MND":"Neustadt (Donau)",
+  "MVG":"Vohburg","MVRW":"Vohburg Werkbahnhof Bayernoil",
+  "NN":"Nürnberg Hbf","NNR":"Nürnberg Rbf","NF":"Fürth (Bay) Hbf","NF G":"Fürth (Bay) Gbf",
+  "NLF":"Lichtenfels","NPR":"Pressig-Rothenkirchen","NPA":"Passau Hbf",
+  "NAH":"Aschaffenburg Hbf","NRH":"Regensburg Hbf","NRH B":"Regensburg Bbf","NSL":"Saal (Donau)",
+  "RB":"Basel Badischer Bahnhof","RLR":"Lörrach Hbf","RO":"Offenburg","ROG":"Offenburg Gbf",
+  "REF":"Efringen-Kirchen","RF":"Freiburg Hbf",
+  "TS":"Stuttgart Hbf","TS R":"Stuttgart Hbf Rosenstein","TSH":"Stuttgart Hafen","TK":"Kornwestheim Rbf",
+  "UE":"Erfurt Hbf","UEG":"Erfurt Gbf","UGT":"Gerstungen","UGO":"Gotha",
+  "UNM":"Naumburg (Saale) Hbf","UWM":"Weimar","US":"Saalfeld (Saale)","UPR":"Probstzella",
+  "WA":"Angermünde","WE":"Eberswalde Hbf","WN":"Neubrandenburg","WN G":"Neubrandenburg Gbf",
+  "WSRR":"Stralsund Rügendamm","WGI":"Grimmen","WSD":"Stendell PCK",
+  "WR":"Rostock Hbf","WRS":"Rostock Seehafen",
+  "XFI":"Firmensitz","XZH":"Heimatadresse"
+};
+
+// ONLOAD
+window.onload = ()=>{
+  UI.goto('start');
+  RIL.renderList();
+  RIL.renderDatalist();
+};
+</script>
+</body>
+</html>

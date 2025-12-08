@@ -1,10 +1,11 @@
-<!-- =============== LOKZEIT v4.5 — BLOCK 1/4 (HEAD + STYLES) =============== --><!doctype html>
-
+<!doctype html>
 <html lang="de">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>LokZeit – Mobile v4.5</title> <link rel="manifest" href="manifest.json"> <style>
+  <title>LokZeit – Mobile v4.5</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
     :root{
       --bg:#0a0c10;
       --card:#0f141d;
@@ -25,7 +26,7 @@
 
     *{box-sizing:border-box}
 
-    .app{max-width:860px;margin:0 auto;padding:10px 12px 20px}
+    .app{max-width:860px;margin:0 auto;padding:10px 12px 40px}
 
     /* HEADER */
     .header{
@@ -36,17 +37,42 @@
       backdrop-filter:blur(6px)
     }
 
-    .title{font-weight:800;letter-spacing:.3px;font-size:19px}
-    .chip{border:1px solid var(--border);border-radius:999px;padding:4px 9px;font-size:11px;color:var(--sub);}
+    .title{
+      font-weight:800;letter-spacing:.3px;font-size:19px;
+    }
+
     .grow{flex:1}
 
-    /* NAV BUTTONS */
-    .nav{display:flex;gap:8px}
-    .nav button{
-      background:#162032;border:1px solid var(--border);color:var(--text);
-      border-radius:12px;padding:8px 12px;font-size:13px;font-weight:600;
+    .menu-btn{
+      border:none;border-radius:50%;width:36px;height:36px;
+      display:flex;align-items:center;justify-content:center;
+      background:#111827;color:var(--text);font-size:20px;
+      box-shadow:0 2px 6px rgba(0,0,0,.4);cursor:pointer;
     }
-    .nav button.active{background:var(--primary);border-color:var(--primary)}
+
+    /* SIDE MENU */
+    .side-menu-backdrop{
+      position:fixed;inset:0;z-index:35;background:rgba(0,0,0,.4);
+      display:none;
+    }
+    .side-menu{
+      position:fixed;top:0;right:-260px;width:260px;height:100%;
+      background:#020617;border-left:1px solid var(--border);
+      box-shadow:-4px 0 14px rgba(0,0,0,.6);
+      z-index:36;padding:16px 14px;display:flex;flex-direction:column;gap:6px;
+      transition:right .22s ease-out;
+    }
+    .side-menu.open{right:0}
+    .side-menu-backdrop.open{display:block}
+    .side-title{font-weight:700;margin-bottom:8px;}
+    .side-sub{font-size:12px;color:var(--sub);margin-bottom:14px;}
+    .side-menu button{
+      background:#0b1120;border:1px solid var(--border);
+      color:var(--text);border-radius:12px;padding:9px 10px;
+      text-align:left;font-size:14px;font-weight:500;cursor:pointer;
+    }
+    .side-menu button.primary{background:var(--primary);border-color:var(--primary);}
+    .side-menu button.small{font-size:12px;padding:6px 8px;margin-top:4px;}
 
     /* BANNER */
     .banner{
@@ -64,6 +90,7 @@
 
     /* LABELS */
     h2{margin:0 0 8px;font-size:20px}
+    h3{margin:8px 0;font-size:16px}
     label{display:block;color:var(--sub);margin:14px 0 6px;font-size:15px;font-weight:600;}
 
     /* INPUTS */
@@ -78,46 +105,133 @@
     /* BUTTONS */
     .btn{width:100%;border:none;border-radius:14px;padding:14px 16px;
       font-size:17px;font-weight:700;color:#fff;background:var(--primary);
-      margin-top:10px;
+      margin-top:10px;cursor:pointer;
     }
     .btn.ghost{background:#0f172a;border:1px solid var(--border);color:var(--sub)}
     .btn.ok{background:var(--ok)}
     .btn.danger{background:var(--danger)}
 
-    /* AUTOCOMPLETE */
-    .ac-list{position:absolute;z-index:50;background:#0f172a;width:100%;border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow)}
-    .ac-item{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer}
-    .ac-item:hover{background:#182030}
-    .ac-item:last-child{border-bottom:none}
+    /* TABLE (Monatsübersicht & Auslöse) */
+    .table-wrap{
+      width:100%;overflow-x:auto;margin-top:10px;
+    }
+    table{
+      width:100%;border-collapse:collapse;font-size:13px;
+    }
+    th,td{
+      border:1px solid var(--border);
+      padding:6px 8px;text-align:left;
+      white-space:nowrap;
+    }
+    th{background:#020617}
+
+    /* FOOTER */
+    .footer{
+      margin-top:18px;font-size:11px;color:var(--sub);text-align:center;
+    }
+
+    /* BADGES */
+    .badge{
+      display:inline-block;
+      padding:2px 6px;
+      border-radius:999px;
+      font-size:11px;
+      background:#1e293b;
+      color:#e5e7eb;
+      margin-right:4px;
+    }
+    .badge-manual{
+      background:#f97316;
+      color:#fff7ed;
+    }
+
+    /* AUSLÖSE-MODAL */
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,.7);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:50;
+    }
+    .modal-backdrop.show{display:flex;}
+    .modal{
+      background:#020617;
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:16px;
+      width:92%;
+      max-width:420px;
+      box-shadow:0 10px 30px rgba(0,0,0,.6);
+      color:var(--text);
+    }
+    .modal h3{
+      margin:0 0 8px;
+      font-size:18px;
+    }
+    .modal-row{
+      margin-top:8px;
+      font-size:14px;
+    }
+    .modal-row label{
+      margin:0 0 4px;
+      font-size:13px;
+      color:var(--sub);
+      font-weight:600;
+    }
+    .modal-footer{
+      margin-top:12px;
+      display:flex;
+      gap:8px;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .modal-footer .btn{
+      margin-top:0;
+      font-size:14px;
+      padding:10px 12px;
+      width:auto;
+    }
 
     /* PRINT */
     @media print{
       @page { size:A4 portrait; margin: 12mm 12mm 12mm 12mm; }
       body{background:#fff;color:#000;font-family:Arial, sans-serif;}
-      .header,.nav,.banner,.no-print{display:none!important}
+      .header,.banner,.no-print,.side-menu,.side-menu-backdrop,.modal-backdrop{display:none!important}
       .app{max-width:none;padding:0;margin:0}
+      .card{box-shadow:none;border-radius:0;border:none;margin:6px 0;padding:6px 0;}
+      table{font-size:11px;}
     }
-  </style></head>
+  </style>
+</head>
 <body>
 <div class="app">
-<!-- HEADER -->
+  <!-- HEADER -->
   <div class="header no-print">
     <div class="title">LokZeit – Mobile</div>
-    <span class="chip">v4.5</span>
-    <span class="chip">offline</span>
     <div class="grow"></div>
-    <div class="nav">
-      <button id="nav-start" class="active" onclick="UI.goto('start')">Start</button>
-      <button id="nav-act" onclick="UI.goto('activities')">Tät.</button>
-      <button id="nav-ev" onclick="UI.goto('events')">Vorf.</button>
-      <button id="nav-sum" onclick="UI.goto('summary')">Über.</button>
-    </div>
+    <button class="menu-btn" onclick="UI.toggleMenu()">☰</button>
   </div>
 
-  <!-- BANNER -->
-  <div class="banner no-print">
-    LokZeit v4.5 – Arbeitszeit, schutzwürdige Zeit, Gastfahrt (75 %), Mindestabnahme 8 h, Nachtschichten & Warnungen.
+  <!-- SIDE MENU -->
+  <div id="menuBackdrop" class="side-menu-backdrop no-print" onclick="UI.toggleMenu(false)"></div>
+  <div id="sideMenu" class="side-menu no-print">
+    <div class="side-title">LokZeit</div>
+    <div classside-sub">Arbeitszeiterfassung für Lokführer – offlinefähig</div>
+    <button class="primary" onclick="UI.menuGo('start')">Dienst starten</button>
+    <button onclick="UI.menuGo('activities')">Tätigkeiten</button>
+    <button onclick="UI.menuGo('events')">Vorkommnisse</button>
+    <button onclick="UI.menuGo('summary')">Tagesübersicht</button>
+    <button onclick="UI.menuGo('month')">Monatsübersicht</button>
+    <button onclick="UI.menuGo('ausloese')">Auslöserechner</button>
+    <button onclick="UI.menuGo('ril')" class="small">Ril100 verwalten</button>
   </div>
+
+<!-- BANNER -->
+<div class="banner no-print">
+  LokZeit – Arbeitszeiterfassung für Eisenbahner
+</div>
 
   <!-- START -->
   <section id="view-start" class="card">
@@ -161,7 +275,7 @@
     <button class="btn ok" onclick="RIL.add()">Kürzel hinzufügen / aktualisieren</button>
 
     <h2 style="margin-top:18px;font-size:18px">Gespeicherte Kürzel</h2>
-    <div id="rilListView"></div>
+    <div id="rilListView" style="font-size:13px;line-height:1.4;"></div>
   </section>
 
   <!-- TÄTIGKEITENLISTE -->
@@ -173,7 +287,7 @@
     <div id="actDebug" style="margin-top:8px;font-size:13px;color:#94a3b8"></div>
 
     <button class="btn" style="margin-top:16px" onclick="UI.goto('events')">Vorkommnisse erfassen</button>
-    <button class="btn ghost" style="margin-top:8px" onclick="UI.goto('summary')">Direkt zur Übersicht</button>
+    <button class="btn ghost" style="margin-top:8px" onclick="UI.goto('summary')">Direkt zur Tagesübersicht</button>
   </section>
 
   <!-- TÄTIGKEITSFORMULAR -->
@@ -225,14 +339,17 @@
     <textarea id="incNote"></textarea>
 
     <button class="btn ok" onclick="Actions.addIncident()">Vorkommnis speichern</button>
+
+    <div id="eventList" style="margin-top:12px;"></div>
   </section>
 
-  <!-- ZUSAMMENFASSUNG -->
+  <!-- TAGES-ÜBERSICHT -->
   <section id="view-summary" class="card" style="display:none">
-    <h2>Übersicht</h2>
-    <div class="no-print" style="display:flex;gap:8px;margin-bottom:8px">
+    <h2>Tagesübersicht</h2>
+    <div class="no-print" style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
       <button class="btn ghost" style="width:auto;padding:10px 12px" onclick="UI.printPdf()">PDF / Drucken</button>
       <button class="btn ghost" style="width:auto;padding:10px 12px" onclick="App.shareReport()">Teilen</button>
+      <button class="btn ghost" style="width:auto;padding:10px 12px" onclick="App.finishShift()">Schicht abschließen & speichern</button>
     </div>
 
     <div id="summaryStats" class="card" style="margin-top:8px"></div>
@@ -240,7 +357,89 @@
     <div id="summaryContent" style="margin-top:8px"></div>
   </section>
 
-</div> <!-- .app schließen -->
+  <!-- MONATSÜBERSICHT -->
+  <section id="view-month" class="card" style="display:none">
+    <h2>Monatsübersicht</h2>
+    <label>Monat auswählen</label>
+    <select id="monthSelect" onchange="Month.render()"></select>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Tag</th>
+            <th>Schicht</th>
+            <th>produktive AZ</th>
+            <th>nicht produktive AZ<br>(TU & Pause)</th>
+            <th>Gastfahrt</th>
+            <th>Gesamtarbeitszeit<br>(inkl. Mindestabnahme)</th>
+          </tr>
+        </thead>
+        <tbody id="monthTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="card" style="margin-top:10px;" id="monthTotals"></div>
+  </section>
+
+  <!-- AUSLÖSERECHNER (NEU) -->
+  <section id="view-ausloese" class="card" style="display:none">
+    <h2>Auslöserechner</h2>
+
+    <label>Monat auswählen</label>
+    <select id="ausMonthSelect" onchange="Ausloese.render()"></select>
+
+    <div class="table-wrap" style="margin-top:8px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Datum</th>
+            <th>Schichtlabel (aus Monatsübersicht)</th>
+            <th>Abwesenheit (h)</th>
+            <th>System-Auslöse</th>
+            <th>Manuell</th>
+            <th>Final</th>
+          </tr>
+        </thead>
+        <tbody id="ausTableBody"></tbody>
+      </table>
+    </div>
+
+    <div id="ausTotal" style="margin-top:10px;font-size:13px;"></div>
+
+    <button class="btn ghost no-print" style="margin-top:10px" onclick="Ausloese.exportText()">Auslöse als Text anzeigen / kopieren</button>
+  </section>
+
+  <!-- AUSLÖSE-MODAL -->
+  <div id="ausModalBackdrop" class="modal-backdrop no-print">
+    <div class="modal">
+      <h3>Auslöse bearbeiten</h3>
+      <div class="modal-row">
+        <div id="ausModalDate" style="font-weight:700;"></div>
+      </div>
+      <div class="modal-row">
+        <label>System-Auslöse</label>
+        <div id="ausModalSystem"></div>
+      </div>
+      <div class="modal-row">
+        <label for="ausModalManual">Manueller Auslöse-Betrag (€)</label>
+        <input id="ausModalManual" type="number" step="0.01">
+      </div>
+      <div class="modal-footer">
+        <button class="btn danger" id="ausModalClear">Manuell löschen</button>
+        <div>
+          <button class="btn ghost" id="ausModalCancel">Abbrechen</button>
+          <button class="btn ok" id="ausModalSave">Speichern</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer no-print">
+    (c) by Adem Hartwich unterstützt von ChatGPT // 2025 // LokZeit – Version 4.5
+  </div>
+</div> <!-- .app -->
 
 <script>
 // ===== STATE =====
@@ -254,30 +453,42 @@ const state = {
   settings: {
     gastFaktor: 0.75,
     mindestAbnahmeMin: 8*60
-  }
+  },
+  months: {} // key: 'YYYY-MM' -> { shifts: [...], ausloeseDays?: { 'YYYY-MM-DD': { hours, manual } } }
 };
 
-// ===== UTILS =====
+// ===== UTILS / UI =====
 const UI = {
   qs: s => document.querySelector(s),
   qsa: s => document.querySelectorAll(s),
 
   goto(view){
-    const views = ['start','ril','activities','actForm','events','summary'];
+    const views = ['start','ril','activities','actForm','events','summary','month','ausloese'];
     views.forEach(v=>{
       const el = UI.qs('#view-' + v);
       if(el) el.style.display = (v===view ? 'block' : 'none');
     });
-    ['start','act','ev','sum'].forEach(id=>{
-      const b = UI.qs('#nav-' + id);
-      if(b) b.classList.remove('active');
-    });
-    if(view==='start') UI.qs('#nav-start').classList.add('active');
-    if(view==='activities') UI.qs('#nav-act').classList.add('active');
-    if(view==='events') UI.qs('#nav-ev').classList.add('active');
-    if(view==='summary') UI.qs('#nav-sum').classList.add('active');
-
     if(view==='summary') App.updateSummary();
+    if(view==='month') Month.init();
+    if(view==='ausloese') Ausloese.init();
+  },
+
+  menuGo(view){
+    UI.toggleMenu(false);
+    UI.goto(view);
+  },
+
+  toggleMenu(force){
+    const menu = UI.qs('#sideMenu');
+    const back = UI.qs('#menuBackdrop');
+    const open = force !== undefined ? force : !menu.classList.contains('open');
+    if(open){
+      menu.classList.add('open');
+      back.classList.add('open');
+    } else {
+      menu.classList.remove('open');
+      back.classList.remove('open');
+    }
   },
 
   rilExpand(inp){
@@ -643,6 +854,7 @@ const RIL = {
     UI.qs('#rilName').value = '';
     RIL.renderList();
     RIL.renderDatalist();
+    App.saveMonthsToStorage();
   },
   renderList(){
     const box = UI.qs('#rilListView');
@@ -777,7 +989,7 @@ const Actions = {
   }
 };
 
-// Arbeitszeit-Berechnung
+// Arbeitszeit-Berechnung + Monatslogik
 const App = {
   parseHM(str){
     if(!str) return null;
@@ -848,7 +1060,14 @@ const App = {
     const calcNonProt = Math.max(0, workTotalMin - workProtectMin - workGastMin);
     if(workNonProtectMin < calcNonProt) workNonProtectMin = calcNonProt;
 
-    const payoutMin = Math.max(workTotalMin, state.settings.mindestAbnahmeMin);
+    // Mindestabnahme: nur, wenn echte Arbeitszeit > 0 und nicht reine Gastfahrt/Hotel
+    const hasProductive = workProtectMin > 0 || workNonProtectMin > 0 || pauseMin > 0;
+    let payoutMin;
+    if(hasProductive){
+      payoutMin = Math.max(workTotalMin, state.settings.mindestAbnahmeMin);
+    } else {
+      payoutMin = workTotalMin; // reine Gastfahrt-Ketten ohne Mindestabnahme
+    }
 
     const warnings = [];
     if(workTotalMin > 6*60 && pauseMin < 30){
@@ -967,8 +1186,122 @@ const App = {
     }
   },
 
+  finishShift(){
+    // Schicht in Monatsdaten übernehmen und dann resetten
+    if(!state.duty){
+      alert("Kein Dienst gestartet.");
+      return;
+    }
+    const stats = App.computeStats();
+    App.storeShift(stats);
+    alert("Schicht wurde in der Monatsübersicht gespeichert.");
+    App.resetAll();
+  },
+
+  storeShift(stats){
+    const d = state.duty;
+    if(!d || !d.date) return;
+    const dateStr = d.date; // YYYY-MM-DD
+    const monthKey = dateStr.substring(0,7); // YYYY-MM
+    if(!state.months[monthKey]) state.months[monthKey] = { shifts:[] };
+
+    // Start-/Ziel-RIL
+    const startPlace = d.place || "";
+    const startCode = App.extractRilCode(startPlace) || "???";
+
+    // Ziel: aus letzter Tätigkeit
+    let endPlace = d.place || "";
+    if(state.activities.length){
+      const last = state.activities[state.activities.length-1];
+      if(last.endPlace) endPlace = last.endPlace;
+      else if(last.place) endPlace = last.place;
+      else if(last.startPlace) endPlace = last.startPlace;
+    }
+    const endCode = App.extractRilCode(endPlace) || startCode;
+
+    const dayLabel = App.formatDayLabel(dateStr); // DD.MM
+    const shiftLabel = `${dayLabel}_${startCode}${endCode}`;
+
+    // Zeit für Auslöse: von Dienstbeginn bis letzte Tätigkeit / Hotel
+    const startAbs = App.toMinutesAbs(dateStr, d.startTime || "00:00");
+    let endAbs = startAbs;
+    if(state.activities.length){
+      const last = state.activities[state.activities.length-1];
+      const endTime = last.endTime || d.startTime || "00:00";
+      endAbs = App.toMinutesAbs(dateStr, endTime);
+      if(endAbs < startAbs) endAbs += 24*60;
+    }
+
+    const shift = {
+      date: dateStr,
+      dayLabel,
+      shiftNo: d.shift || "",
+      label: shiftLabel,
+      startCode,
+      endCode,
+      stats: {
+        workProtectMin: stats.workProtectMin,
+        workNonProtectMin: stats.workNonProtectMin,
+        workGastMin: stats.workGastMin,
+        pauseMin: stats.pauseMin,
+        payoutMin: stats.payoutMin
+      },
+      startAbs,
+      endAbs
+    };
+
+    state.months[monthKey].shifts.push(shift);
+    App.saveMonthsToStorage();
+  },
+
+  extractRilCode(str){
+    if(!str) return "";
+    return str.split('–')[0].trim().toUpperCase();
+  },
+
+  formatDayLabel(dateStr){
+    if(!dateStr) return "";
+    const [y,m,d] = dateStr.split('-');
+    return `${d}.${m}`;
+  },
+
+  toMinutesAbs(dateStr, timeStr){
+    try{
+      if(!dateStr) dateStr = "1970-01-01";
+      if(!timeStr) timeStr = "00:00";
+      const dt = new Date(dateStr + "T" + timeStr + ":00");
+      return Math.floor(dt.getTime()/60000);
+    }catch(e){
+      return 0;
+    }
+  },
+
+  saveMonthsToStorage(){
+    try{
+      const data = {
+        months: state.months,
+        ril: state.ril
+      };
+      localStorage.setItem('lokzeitData', JSON.stringify(data));
+    }catch(e){
+      console.log("Konnte Monatsdaten nicht speichern:", e);
+    }
+  },
+
+  loadMonthsFromStorage(){
+    try{
+      const raw = localStorage.getItem('lokzeitData');
+      if(!raw) return;
+      const data = JSON.parse(raw);
+      if(data.months) state.months = data.months;
+      if(data.ril) state.ril = Object.assign(state.ril, data.ril);
+    }catch(e){
+      console.log("Konnte Monatsdaten nicht laden:", e);
+    }
+  },
+
   resetAll(){
-    if(!confirm("Wirklich alles löschen?")) return;
+    if(!confirm("Wirklich alles für die aktuelle Schicht löschen? (Monatsdaten bleiben erhalten)")) return;
     state.duty=null;state.activities=[];state.incidents=[];
     state.lastContext={endTime:"",place:"",loco:"",train:""};
     state.editIndex=null;
@@ -980,6 +1313,415 @@ const App = {
     UI.qs('#actList').innerHTML='';
     UI.qs('#actDebug').textContent='';
     const ev = UI.qs('#eventList'); if(ev) ev.innerHTML='';
+  }
+};
+
+// MONATSÜBERSICHT
+const Month = {
+  init(){
+    // Monat-Auswahl befüllen
+    const sel = UI.qs('#monthSelect');
+    const keys = Object.keys(state.months).sort();
+    sel.innerHTML = '';
+    if(!keys.length){
+      const opt = document.createElement('option');
+      opt.value = ''; opt.textContent = 'Keine gespeicherten Monate';
+      sel.appendChild(opt);
+      UI.qs('#monthTableBody').innerHTML = '';
+      UI.qs('#monthTotals').innerHTML = 'Noch keine Schichten gespeichert.';
+      return;
+    }
+    keys.forEach(k=>{
+      const opt = document.createElement('option');
+      opt.value = k;
+      const [y,m] = k.split('-');
+      opt.textContent = `${m}/${y}`;
+      sel.appendChild(opt);
+    });
+    sel.value = keys[keys.length-1]; // letzten Monat wählen
+    Month.render();
+  },
+
+  render(){
+    const key = UI.qs('#monthSelect').value;
+    const body = UI.qs('#monthTableBody');
+    const totBox = UI.qs('#monthTotals');
+    body.innerHTML = '';
+    totBox.innerHTML = '';
+    if(!key || !state.months[key]){
+      totBox.textContent = 'Keine Daten für diesen Monat.';
+      return;
+    }
+    const month = state.months[key];
+    const shifts = month.shifts || [];
+    if(!shifts.length){
+      totBox.textContent = 'Keine Schichten in diesem Monat.';
+      return;
+    }
+
+    // Nach Datum sortieren
+    shifts.sort((a,b)=> a.date.localeCompare(b.date) || a.startAbs - b.startAbs);
+
+    // Tage im Monat ermitteln
+    const [yearStr,monthStr] = key.split('-');
+    const year = parseInt(yearStr,10);
+    const mIdx = parseInt(monthStr,10)-1;
+    const daysInMonth = new Date(year, mIdx+1, 0).getDate();
+
+    // Map nach Tag
+    const dayMap = {};
+    shifts.forEach(s=>{
+      const day = parseInt(s.date.split('-')[2],10);
+      if(!dayMap[day]) dayMap[day] = [];
+      dayMap[day].push(s);
+    });
+
+    let sumProd=0,sumNonProd=0,sumGast=0,sumPayout=0;
+
+    for(let day=1; day<=daysInMonth; day++){
+      const list = dayMap[day] || [];
+      if(!list.length){
+        body.innerHTML += `
+          <tr>
+            <td>${day.toString().padStart(2,'0')}.${monthStr}</td>
+            <td>arbeitsfrei</td>
+            <td>-</td><td>-</td><td>-</td><td>-</td>
+          </tr>
+        `;
+        continue;
+      }
+      // mehrere Schichten an einem Tag – zusammenfassen
+      let prod=0,nonProd=0,gast=0,payout=0;
+      let label = list[0].label;
+      if(list.length>1){
+        label = list.map(s=>s.label).join(', ');
+      }
+      list.forEach(s=>{
+        prod   += s.stats.workProtectMin||0;
+        nonProd+= (s.stats.workNonProtectMin||0)+(s.stats.pauseMin||0);
+        gast   += s.stats.workGastMin||0;
+        payout += s.stats.payoutMin||0;
+      });
+      sumProd+=prod;sumNonProd+=nonProd;sumGast+=gast;sumPayout+=payout;
+
+      const fmt = App.fmtHM;
+      body.innerHTML += `
+        <tr>
+          <td>${day.toString().padStart(2,'0')}.${monthStr}</td>
+          <td>${label}</td>
+          <td>${fmt(prod)}</td>
+          <td>${fmt(nonProd)}</td>
+          <td>${fmt(gast)}</td>
+          <td>${fmt(payout)}</td>
+        </tr>
+      `;
+    }
+
+    const fmt = App.fmtHM;
+    totBox.innerHTML = `
+      <strong>Monatssumme</strong><br>
+      Produktive Arbeitszeit: ${fmt(sumProd)}<br>
+      Nicht produktive Zeit (TU & Pause): ${fmt(sumNonProd)}<br>
+      Gastfahrt (75 %): ${fmt(sumGast)}<br>
+      Gesamtarbeitszeit (inkl. Mindestabnahme): ${fmt(sumPayout)}
+    `;
+  }
+};
+
+// ===== AUSLÖSERECHNER – NEU =====
+
+// interne Hilfs-Variablen für das Modal
+let ausModalBackdrop, ausModalDate, ausModalSystem, ausModalManual;
+let ausModalClear, ausModalCancel, ausModalSave;
+let ausModalCurrentDate = null;
+
+const Ausloese = {
+  // Auslöse-Formel: hier kannst du später deine DB-Stufen anpassen
+  computeSystem(hours){
+    const h = Number(hours) || 0;
+    if(h >= 24) return 28; // voller Tag
+    if(h >= 8)  return 14; // > 8h
+    return 0;              // keine Auslöse
+  },
+
+  getDaysInMonth(key){
+    const [yStr,mStr] = key.split("-");
+    const year = parseInt(yStr,10);
+    const month = parseInt(mStr,10)-1; // 0-basiert
+    return new Date(year, month+1, 0).getDate();
+  },
+
+  ensureAusloeseDays(key){
+    const month = state.months[key];
+    if(!month) return null;
+    if(!month.ausloeseDays) month.ausloeseDays = {};
+
+    const daysInMonth = Ausloese.getDaysInMonth(key);
+    const shifts = month.shifts || [];
+
+    // Map: dateStr -> [shifts]
+    const byDate = {};
+    shifts.forEach(s=>{
+      if(!byDate[s.date]) byDate[s.date] = [];
+      byDate[s.date].push(s);
+    });
+
+    for(let day=1; day<=daysInMonth; day++){
+      const dateStr = `${key}-${String(day).padStart(2,'0')}`;
+      if(!month.ausloeseDays[dateStr]){
+        // Stunden aus Schichten dieses Tages vorbelegen
+        let hours = 0;
+        const list = byDate[dateStr] || [];
+        list.forEach(s=>{
+          const durMin = (s.endAbs||0) - (s.startAbs||0);
+          if(durMin>0) hours += durMin/60;
+        });
+        month.ausloeseDays[dateStr] = {
+          hours: Math.round(hours*100)/100,
+          manual: null
+        };
+      }
+    }
+    return month;
+  },
+
+  initModal(){
+    if(ausModalBackdrop) return; // schon initialisiert
+    ausModalBackdrop = UI.qs('#ausModalBackdrop');
+    ausModalDate     = UI.qs('#ausModalDate');
+    ausModalSystem   = UI.qs('#ausModalSystem');
+    ausModalManual   = UI.qs('#ausModalManual');
+    ausModalClear    = UI.qs('#ausModalClear');
+    ausModalCancel   = UI.qs('#ausModalCancel');
+    ausModalSave     = UI.qs('#ausModalSave');
+
+    if(!ausModalBackdrop) return;
+
+    ausModalCancel.addEventListener('click', ()=> Ausloese.closeModal());
+    ausModalBackdrop.addEventListener('click', e=>{
+      if(e.target === ausModalBackdrop) Ausloese.closeModal();
+    });
+    ausModalClear.addEventListener('click', ()=>{
+      if(!ausModalCurrentDate) return;
+      const key = UI.qs('#ausMonthSelect').value;
+      const month = state.months[key];
+      if(!month || !month.ausloeseDays) return;
+      if(month.ausloeseDays[ausModalCurrentDate]){
+        month.ausloeseDays[ausModalCurrentDate].manual = null;
+      }
+      App.saveMonthsToStorage();
+      Ausloese.render();
+      Ausloese.closeModal();
+    });
+    ausModalSave.addEventListener('click', ()=>{
+      if(!ausModalCurrentDate) return;
+      const key = UI.qs('#ausMonthSelect').value;
+      const month = state.months[key];
+      if(!month || !month.ausloeseDays) return;
+      const entry = month.ausloeseDays[ausModalCurrentDate];
+      if(!entry) return;
+      const v = ausModalManual.value;
+      entry.manual = v === "" ? null : Number(v);
+      App.saveMonthsToStorage();
+      Ausloese.render();
+      Ausloese.closeModal();
+    });
+  },
+
+  openModal(dateStr, systemAmount){
+    Ausloese.initModal();
+    if(!ausModalBackdrop) return;
+    ausModalCurrentDate = dateStr;
+    const [y,m,d] = dateStr.split("-");
+    ausModalDate.textContent = `${d}.${m}.${y}`;
+    ausModalSystem.textContent = systemAmount.toFixed(2).replace('.',',') + " €";
+
+    const key = UI.qs('#ausMonthSelect').value;
+    const month = state.months[key];
+    const entry = month?.ausloeseDays?.[dateStr];
+    ausModalManual.value = (entry && entry.manual != null) ? entry.manual : "";
+
+    ausModalBackdrop.classList.add('show');
+    ausModalManual.focus();
+  },
+
+  closeModal(){
+    if(ausModalBackdrop) ausModalBackdrop.classList.remove('show');
+    ausModalCurrentDate = null;
+  },
+
+  init(){
+    const sel = UI.qs('#ausMonthSelect');
+    const keys = Object.keys(state.months).sort();
+    sel.innerHTML = '';
+    if(!keys.length){
+      const opt = document.createElement('option');
+      opt.value = ''; opt.textContent = 'Keine gespeicherten Monate';
+      sel.appendChild(opt);
+      UI.qs('#ausTableBody').innerHTML = '';
+      UI.qs('#ausTotal').innerHTML = 'Noch keine Schichten gespeichert.';
+      return;
+    }
+    keys.forEach(k=>{
+      const opt = document.createElement('option');
+      opt.value = k;
+      const [y,m] = k.split('-');
+      opt.textContent = `${m}/${y}`;
+      sel.appendChild(opt);
+    });
+    sel.value = keys[keys.length-1];
+    Ausloese.render();
+  },
+
+  render(){
+    const key = UI.qs('#ausMonthSelect').value;
+    const body = UI.qs('#ausTableBody');
+    const totBox = UI.qs('#ausTotal');
+    body.innerHTML = '';
+    totBox.innerHTML = '';
+
+    if(!key || !state.months[key]){
+      totBox.textContent = 'Keine Daten für diesen Monat.';
+      return;
+    }
+    const month = Ausloese.ensureAusloeseDays(key);
+    const shifts = month.shifts || [];
+    const daysInMonth = Ausloese.getDaysInMonth(key);
+
+    // Map dateStr -> Labels (aus Monatsübersicht)
+    const labelMap = {};
+    shifts.forEach(s=>{
+      const d = s.date;
+      if(!labelMap[d]) labelMap[d] = [];
+      labelMap[d].push(s.label);
+    });
+
+    let sumSystem = 0;
+    let sumManual = 0;
+    let sumFinal  = 0;
+
+    for(let day=1; day<=daysInMonth; day++){
+      const dateStr = `${key}-${String(day).padStart(2,'0')}`;
+      const entry = month.ausloeseDays[dateStr];
+      const labels = labelMap[dateStr] || [];
+      const labelText = labels.length ? labels.join(', ') : 'arbeitsfrei';
+
+      const hours = entry ? (Number(entry.hours)||0) : 0;
+      const systemAmount = Ausloese.computeSystem(hours);
+      const manualAmount = (entry && entry.manual != null) ? Number(entry.manual) : null;
+      const finalAmount  = (manualAmount != null ? manualAmount : systemAmount);
+
+      sumSystem += systemAmount;
+      if(manualAmount != null) sumManual += manualAmount;
+      sumFinal += finalAmount;
+
+      const tr = document.createElement('tr');
+
+      tr.addEventListener('click', (e)=>{
+        if(e.target.tagName.toLowerCase()==='input') return;
+        Ausloese.openModal(dateStr, systemAmount);
+      });
+
+      const tdDate = document.createElement('td');
+      tdDate.textContent = `${String(day).padStart(2,'0')}.${key.split('-')[1]}.`;
+      tr.appendChild(tdDate);
+
+      const tdLabel = document.createElement('td');
+      tdLabel.textContent = labelText;
+      tr.appendChild(tdLabel);
+
+      const tdHours = document.createElement('td');
+      const inpHours = document.createElement('input');
+      inpHours.type = "number";
+      inpHours.step = "0.25";
+      inpHours.min = "0";
+      inpHours.value = hours ? hours : "";
+      inpHours.style.width = "90px";
+      inpHours.addEventListener('click', e=>e.stopPropagation());
+      inpHours.addEventListener('change', ()=>{
+        const v = Number(inpHours.value)||0;
+        month.ausloeseDays[dateStr].hours = v;
+        App.saveMonthsToStorage();
+        Ausloese.render();
+      });
+      tdHours.appendChild(inpHours);
+      tr.appendChild(tdHours);
+
+      const tdSystem = document.createElement('td');
+      tdSystem.textContent = systemAmount.toFixed(2).replace('.',',') + " €";
+      tr.appendChild(tdSystem);
+
+      const tdManual = document.createElement('td');
+      tdManual.textContent = (manualAmount != null)
+        ? manualAmount.toFixed(2).replace('.',',') + " €"
+        : "–";
+      tr.appendChild(tdManual);
+
+      const tdFinal = document.createElement('td');
+      const sourceBadge = document.createElement('span');
+      sourceBadge.className = 'badge';
+      if(manualAmount != null){
+        sourceBadge.classList.add('badge-manual');
+        sourceBadge.textContent = 'M';
+      } else if(systemAmount>0){
+        sourceBadge.textContent = 'S';
+      } else {
+        sourceBadge.textContent = '–';
+      }
+      tdFinal.textContent = finalAmount ? finalAmount.toFixed(2).replace('.',',') + " € " : "0,00 € ";
+      tdFinal.appendChild(sourceBadge);
+      tr.appendChild(tdFinal);
+
+      body.appendChild(tr);
+    }
+
+    totBox.innerHTML = `
+      <strong>Monatssumme Auslöse</strong><br>
+      System-Summe: ${sumSystem.toFixed(2).replace('.',',')} €<br>
+      Manuelle Summe (nur gesetzte Tage): ${sumManual.toFixed(2).replace('.',',')} €<br>
+      <strong>Finale Summe (mit Überschreibungen): ${sumFinal.toFixed(2).replace('.',',')} €</strong>
+    `;
+  },
+
+  exportText(){
+    const key = UI.qs('#ausMonthSelect').value;
+    if(!key || !state.months[key]){
+      alert("Kein Monat gewählt.");
+      return;
+    }
+    const month = Ausloese.ensureAusloeseDays(key);
+    if(!month) {
+      alert("Keine Daten für diesen Monat.");
+      return;
+    }
+    const daysInMonth = Ausloese.getDaysInMonth(key);
+
+    let txt = `Auslöserechner – Monat ${key}\n\n`;
+    let sumFinal = 0;
+
+    for(let day=1; day<=daysInMonth; day++){
+      const dateStr = `${key}-${String(day).padStart(2,'0')}`;
+      const entry = month.ausloeseDays[dateStr];
+      const labels = (month.shifts||[]).filter(s=>s.date===dateStr).map(s=>s.label);
+      const labelText = labels.length ? labels.join(', ') : 'arbeitsfrei';
+
+      const hours = entry ? (Number(entry.hours)||0) : 0;
+      const systemAmount = Ausloese.computeSystem(hours);
+      const manualAmount = (entry && entry.manual != null) ? Number(entry.manual) : null;
+      const finalAmount  = (manualAmount != null ? manualAmount : systemAmount);
+      sumFinal += finalAmount;
+
+      txt += `${String(day).padStart(2,'0')}.${key.split('-')[1]}.  ${labelText}  | `;
+      txt += `Abw: ${hours.toFixed(2).replace('.',',')} h  | `;
+      txt += `System: ${systemAmount.toFixed(2).replace('.',',')} €`;
+      if(manualAmount != null){
+        txt += `  | Manuell: ${manualAmount.toFixed(2).replace('.',',')} €`;
+      }
+      txt += `  | Final: ${finalAmount.toFixed(2).replace('.',',')} €\n`;
+    }
+
+    txt += `\nFinale Monatssumme Auslöse: ${sumFinal.toFixed(2).replace('.',',')} €\n`;
+    alert(txt);
   }
 };
 
@@ -1029,11 +1771,11 @@ state.ril = {
 
 // ONLOAD
 window.onload = ()=>{
+  App.loadMonthsFromStorage();
   UI.goto('start');
   RIL.renderList();
   RIL.renderDatalist();
 };
 </script>
 </body>
-
-</html>
+      </html>
